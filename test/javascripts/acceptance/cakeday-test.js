@@ -228,17 +228,20 @@ acceptance("Cakeday", function (needs) {
     const posterIcons = queryAll(".poster-icon");
 
     assert.equal(posterIcons[0].title, I18n.t("user.anniversary.title"));
-    assert.equal(posterIcons[1].title, I18n.t("user.date_of_birth.title"));
+    assert.equal(posterIcons[1].title, I18n.t("user.date_of_birth.secret_title"));
+    assert.equal(posterIcons[2].title, I18n.t("user.date_of_birth.title"));
     assert.equal(queryAll("img.emoji", posterIcons[0]).length, 1);
     assert.equal(queryAll("img.emoji", posterIcons[1]).length, 1);
+    assert.equal(queryAll("img.emoji", posterIcons[2]).length, 1);
 
-    await click(".trigger-user-card");
+    await click(".trigger-user-card a[data-user-card]");
 
     const emojiImages = queryAll(".emoji-images div");
-
-    assert.equal(emojiImages[1].title, I18n.t("user.anniversary.title"));
-    assert.equal(emojiImages[0].title, I18n.t("user.date_of_birth.title"));
+    assert.equal(emojiImages[0].title, I18n.t("user.date_of_birth.secret_title"));
+    assert.equal(emojiImages[2].title, I18n.t("user.anniversary.title"));
+    assert.equal(emojiImages[1].title, I18n.t("user.date_of_birth.title"));
     assert.equal(1, emojiImages[0].children.length);
     assert.equal(1, emojiImages[1].children.length);
+    assert.equal(1, emojiImages[2].children.length);
   });
 });

@@ -205,10 +205,8 @@ acceptance("Cakeday - disconnected", function (needs) {
     await visit("/");
     await click("#toggle-hamburger-menu");
 
-    assert.equal(
-      find(".cakeday-link").length,
-      0,
-      "Cakeday is not shown to anonymous users"
-    );
+    assert
+      .dom(".cakeday-link")
+      .doesNotExist("Cakeday is not shown to anonymous users");
   });
 });
