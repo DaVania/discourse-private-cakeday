@@ -1,19 +1,19 @@
-{{#if siteSettings.private_cakeday_birthday_enabled}}
-  {{#if isBirthday}}
-    {{#if isSecret}}
+{{#if this.siteSettings.private_cakeday_birthday_enabled}}
+  {{#if this.isBirthday}}
+    {{#if this.isSecret}}
       <EmojiImages
-        @list={{siteSettings.private_cakeday_secret_emoji}}
-        @title={{secretTitle}}
+        @list={{this.siteSettings.private_cakeday_secret_emoji}}
+        @title={{this.secretTitle}}
       />
     {{/if}}
     <EmojiImages
-      @list={{siteSettings.private_cakeday_birthday_emoji}}
-      @title={{birthdayTitle}}
+      @list={{this.siteSettings.private_cakeday_birthday_emoji}}
+      @title={{this.birthdayTitle}}
     />
   {{/if}}
 {{/if}}
-{{#if siteSettings.private_cakeday_enabled}}
-  {{#if isCakeday}}
-    <EmojiImages @list={{siteSettings.private_cakeday_emoji}} @title={{cakedayTitle}} />
+{{#if this.siteSettings.private_cakeday_enabled}}
+  {{#if this.isCakeday}}
+    <EmojiImages @list={{this.siteSettings.private_cakeday_emoji}} @title={{this.cakedayTitle}} />
   {{/if}}
 {{/if}}
