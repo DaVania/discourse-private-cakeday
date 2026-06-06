@@ -1,11 +1,11 @@
 <ul class="user-info-list">
-  {{#each @users as |user|}}
+  {{#each @this.users as |user|}}
     <li class="user-info-item">
       <UserInfo @user={{user}}>
-        <div>{{cakeday-date user.cakedate isBirthday=@isBirthday}}</div>
+        <div>{{cakeday-date this.user.cakedate isBirthday=@this.isBirthday}}</div>
       </UserInfo>
     </li>
   {{else}}
-    <div class="user-info-empty-message"><h4>{{yield}}</h4></div>
+    <div class="user-info-empty-message"><h4>{{this.yield}}</h4></div>
   {{/each}}
 </ul>

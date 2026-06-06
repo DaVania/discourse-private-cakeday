@@ -1,107 +1,107 @@
-{{#if siteSettings.private_cakeday_birthday_enabled}}
+{{#if this.siteSettings.private_cakeday_birthday_enabled}}
   <a name="cakeday" />
   <div class="control-group">
     <label class="control-label">{{i18n "user.date_of_birth.label"}}</label>
     <div class="controls">
-    {{#if canChangeBirthdate}}
-      {{#if siteSettings.private_cakeday_birthday_formatdmy}}
+    {{#if this.canChangeBirthdate}}
+      {{#if this.siteSettings.private_cakeday_birthday_formatdmy}}
         <ComboBox
-          @content={{days}}
-          @value={{day}}
+          @content={{this.days}}
+          @value={{this.day}}
           @valueProperty={{null}}
           @nameProperty={{null}}
           @none="cakeday.dd"
           @options={{hash clearable=true autoInsertNoneItem=false none="cakeday.dd"}}
-          @onChange={{action (mut day)}}
+          @onChange={{action (mut this.day)}}
         />
-        {{#if siteSettings.private_cakeday_birthday_show_year}}
+        {{#if this.siteSettings.private_cakeday_birthday_show_year}}
           -
         {{/if}}
         <ComboBox
-          @content={{months}}
-          @value={{month}}
+          @content={{this.months}}
+          @value={{this.month}}
           @valueAttribute="value"
           @valueProperty="value"
           @none="cakeday.mm"
           @options={{hash clearable=true autoInsertNoneItem=false none="cakeday.mm"}}
-          @onChange={{action (mut month)}}
+          @onChange={{action (mut this.month)}}
         />
       {{else}}
         <ComboBox
-          @content={{months}}
-          @value={{month}}
+          @content={{this.months}}
+          @value={{this.month}}
           @valueAttribute="value"
           @valueProperty="value"
           @none="cakeday.mm"
           @options={{hash clearable=true autoInsertNoneItem=false none="cakeday.mm"}}
-          @onChange={{action (mut month)}}
+          @onChange={{action (mut this.month)}}
         />
-        {{#if siteSettings.private_cakeday_birthday_show_year}}
+        {{#if this.siteSettings.private_cakeday_birthday_show_year}}
           -
         {{/if}}
         <ComboBox
-          @content={{days}}
-          @value={{day}}
+          @content={{this.days}}
+          @value={{this.day}}
           @valueProperty={{null}}
           @nameProperty={{null}}
           @none="cakeday.dd"
           @options={{hash clearable=true autoInsertNoneItem=false none="cakeday.dd"}}
-          @onChange={{action (mut day)}}
+          @onChange={{action (mut this.day)}}
         />
       {{/if}}
-      {{#if siteSettings.private_cakeday_birthday_show_year}}
+      {{#if this.siteSettings.private_cakeday_birthday_show_year}}
         -
         {{input
           type="number"
           class="year"
-          value=year
+          value=this.year
           min=1905
           max=2904
           placeholder=(i18n "cakeday.yyyy")
-          onChange=(action (mut year))
+          onChange=(action (mut this.year))
         }}
       {{/if}}
-      {{#if (and hasBirthdate hasAge)}}
+      {{#if (and this.hasBirthdate this.hasAge)}}
         &nbsp; {{d-icon 'check'}}
       {{else}}
-        {{#if siteSettings.private_cakeday_birthday_required}}
-          {{#unless hasBirthdate}}
+        {{#if this.siteSettings.private_cakeday_birthday_required}}
+          {{#unless this.hasBirthdate}}
             {{i18n "user.date_of_birth.required"}}
           {{/unless}}
         {{/if}}
       {{/if}}
     {{else}}
-      {{i18n "user.date_of_birth.nochange" birthdate=userBirthdateText}}
+      {{i18n "user.date_of_birth.nochange" birthdate=this.userBirthdateText}}
     {{/if}}
-    {{#if (and hasBirthdateSaved model.siteSettings.private_cakeday_birthday_allowchange)}}
-      {{#if model.isStaff}}
-        <div><a href="/admin/users/{{model.id}}/{{model.username_lower}}">{{d-icon "wrench"}} {{i18n "admin.user.allow_change_by_user"}}</a></div>
+    {{#if (and this.hasBirthdateSaved this.model.siteSettings.private_cakeday_birthday_allowchange)}}
+      {{#if this.model.isStaff}}
+        <div><a href="/admin/users/{{this.model.id}}/{{this.model.username_lower}}">{{d-icon "wrench"}} {{i18n "admin.user.allow_change_by_user"}}</a></div>
       {{/if}}
     {{else}}
-      {{#unless allowUserChangeBirthdate}}
+      {{#unless this.allowUserChangeBirthdate}}
         <label class="instructions">
           <div class="warning" style="background-color: var(--danger-low-mid); color: rgba(var(--always-black-rgb), 1);">{{d-icon "exclamation-triangle"}} {{i18n "user.date_of_birth.nochange_warn"}}</div>
         </label>
       {{/unless}}
     {{/if}}
-    {{#if (and canControlVisibility hasAge)}}
+    {{#if (and this.canControlVisibility this.hasAge)}}
       <div style="margin-top: 10px;"><a name="show_birthday_to_be_celebrated"></a>
-      {{preference-checkbox labelKey="user.date_of_birth.show_birthday_to_be_celebrated" checked=model.custom_fields.show_birthday_to_be_celebrated}}
+      {{preference-checkbox labelKey="user.date_of_birth.show_birthday_to_be_celebrated" checked=this.model.custom_fields.show_birthday_to_be_celebrated}}
       <label class="instructions">
         {{i18n "user.date_of_birth.always_visible_to_staff"}}
       </label>
-      {{#if model.custom_fields.show_birthday_to_be_celebrated}}
-        {{preference-checkbox labelKey="user.date_of_birth.limit_age_visibility_to_groups" checked=model.custom_fields.limit_age_visibility_to_groups}}
+      {{#if this.model.custom_fields.show_birthday_to_be_celebrated}}
+        {{preference-checkbox labelKey="user.date_of_birth.limit_age_visibility_to_groups" checked=this.model.custom_fields.limit_age_visibility_to_groups}}
         <label class="instructions">
           {{i18n "user.date_of_birth.limit_age_visibility_to_groups2"}}
         </label>
-        {{#if model.custom_fields.limit_age_visibility_to_groups}}
+        {{#if this.model.custom_fields.limit_age_visibility_to_groups}}
         <div>
           {{group-chooser
-            content=TLandCustomGroups
-            value=model.custom_fields.groups_fullbirthday_visible
+            content=this.TLandCustomGroups
+            value=this.model.custom_fields.groups_fullbirthday_visible
             labelProperty="name"
-            onChange=(action (mut model.custom_fields.groups_fullbirthday_visible))}}
+            onChange=(action (mut this.model.custom_fields.groups_fullbirthday_visible))}}
           <label class="instructions">
             {{i18n "user.date_of_birth.show_age_to_theese_groups"}}
           </label>
