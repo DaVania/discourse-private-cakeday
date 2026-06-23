@@ -3,6 +3,6 @@
 source "https://rubygems.org"
 
 group :development do
-  gem "rubocop-discourse"
+  gem "rubocop-discourse", ">= 3.10.0"
   gem "syntax_tree"
 end
