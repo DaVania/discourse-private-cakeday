@@ -1,7 +1,9 @@
-import I18n from "I18n";
-import { acceptance, queryAll } from "discourse/tests/helpers/qunit-helpers";
-import { test } from "qunit";
 import { click, visit } from "@ember/test-helpers";
+import { test } from "qunit";
+import { cloneJSON } from "discourse/lib/object";
+import userFixtures from "discourse/tests/fixtures/user-fixtures";
+import { acceptance, queryAll } from "discourse/tests/helpers/qunit-helpers";
+import { i18n } from "discourse-i18n";
 
 acceptance("Cakeday", function (needs) {
   needs.user();
@@ -64,7 +66,7 @@ acceptance("Cakeday", function (needs) {
               moderator: false,
               admin: true,
               staff: true,
-              user_id: 1,
+              user_id: 2,
               hidden: false,
               hidden_reason_id: null,
               trust_level: 4,
@@ -75,6 +77,7 @@ acceptance("Cakeday", function (needs) {
               wiki: false,
               user_cakedate: moment().subtract(1, "year").format("YYYY-MM-DD"),
               user_birthdate: moment().format("YYYY-MM-DD"),
+              user_celebrate: true,
             },
           ],
           stream: [14],
@@ -208,17 +211,21 @@ acceptance("Cakeday", function (needs) {
         user: {
           birthdate: moment().format("YYYY-MM-DD"),
           cakedate: moment().subtract(1, "year").format("YYYY-MM-DD"),
+          custom_fields: { show_birthday_to_be_celebrated: true },
         },
       });
     });
 
     server.get("/u/tgx/card.json", () => {
-      return response({
-        user: {
-          birthdate: moment().format("YYYY-MM-DD"),
-          cakedate: moment().subtract(1, "year").format("YYYY-MM-DD"),
-        },
+      const card = cloneJSON(userFixtures["/u/charlie/card.json"]);
+      Object.assign(card.user, {
+        id: 2,
+        username: "tgx",
+        birthdate: moment().format("YYYY-MM-DD"),
+        cakedate: moment().subtract(1, "year").format("YYYY-MM-DD"),
+        custom_fields: { show_birthday_to_be_celebrated: true },
       });
+      return response(card);
     });
   });
 
@@ -227,21 +234,18 @@ acceptance("Cakeday", function (needs) {
 
     const posterIcons = queryAll(".poster-icon");
 
-    assert.equal(posterIcons[0].title, I18n.t("user.anniversary.title"));
-    assert.equal(posterIcons[1].title, I18n.t("user.date_of_birth.secret_title"));
-    assert.equal(posterIcons[2].title, I18n.t("user.date_of_birth.title"));
-    assert.equal(queryAll("img.emoji", posterIcons[0]).length, 1);
-    assert.equal(queryAll("img.emoji", posterIcons[1]).length, 1);
-    assert.equal(queryAll("img.emoji", posterIcons[2]).length, 1);
+    assert.strictEqual(posterIcons[0].title, i18n("user.anniversary.title"));
+    assert.strictEqual(posterIcons[1].title, i18n("user.date_of_birth.title"));
+    assert.strictEqual(queryAll("img.emoji", posterIcons[0]).length, 1);
+    assert.strictEqual(queryAll("img.emoji", posterIcons[1]).length, 1);
 
-    await click(".trigger-user-card a[data-user-card]");
+    await click('a[data-user-card="tgx"]');
 
-    const emojiImages = queryAll(".emoji-images div");
-    assert.equal(emojiImages[0].title, I18n.t("user.date_of_birth.secret_title"));
-    assert.equal(emojiImages[2].title, I18n.t("user.anniversary.title"));
-    assert.equal(emojiImages[1].title, I18n.t("user.date_of_birth.title"));
-    assert.equal(1, emojiImages[0].children.length);
-    assert.equal(1, emojiImages[1].children.length);
-    assert.equal(1, emojiImages[2].children.length);
+    const emojiImages = queryAll(".user-card .emoji-images div");
+
+    assert.strictEqual(emojiImages[1].title, i18n("user.anniversary.title"));
+    assert.strictEqual(emojiImages[0].title, i18n("user.date_of_birth.title"));
+    assert.strictEqual(emojiImages[0].children.length, 1);
+    assert.strictEqual(emojiImages[1].children.length, 1);
   });
 });
