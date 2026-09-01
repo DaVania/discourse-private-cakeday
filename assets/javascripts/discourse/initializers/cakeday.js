@@ -1,11 +1,10 @@
 import I18n from "I18n";
+import { action } from "@ember/object";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import {
   birthday,
   cakeday,
 } from "discourse/plugins/discourse-private-cakeday/discourse/lib/cakeday";
-import { getOwner } from "discourse-common/lib/get-owner";
-import { htmlSafe } from "@ember/template";
 
 function initializeCakeday(api) {
   const currentUser = api.getCurrentUser();
@@ -18,24 +17,40 @@ function initializeCakeday(api) {
 
   const siteSettings = api.container.lookup("service:site-settings");
 
-  api.modifyClass("controller:preferences/profile", {
-    pluginId: "discourse-private-cakeday",
+  // The Save button on the Profile tab calls `controller.save` directly
+  // (`@action={{@controller.save}}`), so the override has to replace that
+  // native `@action` method. Overriding the legacy `actions` hash silently
+  // stops working the moment core turns a controller into a native class.
+  //
+  // `hasBirthdate` is written by the date-of-birth connector, so only a
+  // definite `false` blocks the save: an absent flag means the input was never
+  // rendered — as when core hides the whole form to enforce its own required
+  // user fields — and blocking then would trap the member on a page that has
+  // no way to satisfy the demand. The server-side check in plugin.rb is what
+  // covers the gaps.
+  api.modifyClass(
+    "controller:preferences/profile",
+    (Superclass) =>
+      class extends Superclass {
+        @action
+        save() {
+          if (
+            siteSettings.private_cakeday_birthday_required &&
+            !currentUser.staff &&
+            !this.showEnforcedRequiredFieldsNotice &&
+            this.model.hasBirthdate === false
+          ) {
+            this.set("saved", false);
+            this.dialog.alert({
+              message: I18n.t("user.date_of_birth.is_required_error"),
+            });
+            return;
+          }
 
-    actions: {
-      save() {
-        if (siteSettings.private_cakeday_birthday_required && !currentUser.staff && !this.model.hasBirthdate)
-        {
-          const dialog = getOwner(this).lookup("service:dialog");
-          dialog.alert({ message: htmlSafe(I18n.t("user.date_of_birth.is_required_error")) });
+          return super.save(...arguments);
         }
-        else
-        {
-          this._super(...arguments);
-          this.model.hasBirthdateSaved = true;
-        }
-      },
-    },
-  });
+      }
+  );
 
   const emojiEnabled = siteSettings.enable_emoji;
   const cakedayEnabled = siteSettings.private_cakeday_enabled;

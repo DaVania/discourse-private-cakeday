@@ -211,7 +211,7 @@ acceptance("Cakeday", function (needs) {
         user: {
           birthdate: moment().format("YYYY-MM-DD"),
           cakedate: moment().subtract(1, "year").format("YYYY-MM-DD"),
-          custom_fields: { show_birthday_to_be_celebrated: true },
+          show_birthday_to_be_celebrated: true,
         },
       });
     });
@@ -223,7 +223,7 @@ acceptance("Cakeday", function (needs) {
         username: "tgx",
         birthdate: moment().format("YYYY-MM-DD"),
         cakedate: moment().subtract(1, "year").format("YYYY-MM-DD"),
-        custom_fields: { show_birthday_to_be_celebrated: true },
+        show_birthday_to_be_celebrated: true,
       });
       return response(card);
     });

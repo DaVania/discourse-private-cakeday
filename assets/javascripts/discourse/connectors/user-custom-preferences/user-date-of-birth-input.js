@@ -8,6 +8,14 @@ export default {
   setupComponent({ model }, component) {
     const { birthdate } = model;
 
+    // Nothing serializes `date_of_birth`, only `birthdate`, so the model would
+    // otherwise submit an empty `date_of_birth` on every save and silently wipe
+    // the stored date. Seed it so an untouched form saves back what it shows,
+    // and an empty submission really does mean "the user cleared the field".
+    if (birthdate) {
+      model.set("date_of_birth", birthdate);
+    }
+
     const defyear = 1904;
 
     const months = moment.months().map((month, index) => {
@@ -31,26 +39,33 @@ export default {
     const isStaff = this.currentUser.staff;
     const showYear = model.siteSettings.private_cakeday_birthday_show_year;
 
-    let hasBirthdate = false;
-    if (year && showYear) {
-      hasBirthdate = birthdate !== null && year !== null && year > defyear;
-    }
-    else {
-      hasBirthdate = birthdate !== null;
-    }
+    // Same rule as `updateBirthdate` below, and as the server-side check in
+    // plugin.rb: with the year selector on, a birthday carrying the year-less
+    // sentinel does not count. `year` is already null in that case.
+    let hasBirthdate = showYear ? year !== null : Boolean(birthdate);
     model.set("hasBirthdate", hasBirthdate);
 
     let hasAge = year !== null;
-
-    if (model.custom_fields.show_birthday_to_be_celebrated === undefined)
-    {
-      model.set('custom_fields.show_birthday_to_be_celebrated', model.siteSettings.private_cakeday_birthday_celebrate);
-    }
 
     const allowUserChangeBirthdate = isStaff || model.siteSettings.private_cakeday_birthday_allowchange;
     let canChangeBirthdate = allowUserChangeBirthdate || (day === null || month === null || (year === null && showYear));
     const ageControlVisibility = model.siteSettings.private_cakeday_min_age_controlvisibility;
     let canControlVisibility = ageControlVisibility && userAge(birthdate) >= ageControlVisibility || isStaff;
+
+    // Seed the celebrate checkbox from the site default — but only when the
+    // checkbox is actually on screen. `custom_fields` rides along on every
+    // profile save, so seeding it for a member who cannot see the control
+    // writes their "choice" to the database without them ever making one.
+    if (
+      model.custom_fields.show_birthday_to_be_celebrated === undefined &&
+      canControlVisibility &&
+      hasAge
+    ) {
+      model.set(
+        "custom_fields.show_birthday_to_be_celebrated",
+        model.siteSettings.private_cakeday_birthday_celebrate
+      );
+    }
     
     let showGroups = hasAge && showYear && canControlVisibility;
 
