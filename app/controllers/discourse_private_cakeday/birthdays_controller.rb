@@ -2,6 +2,8 @@
 
 module DiscoursePrivateCakeday
   class BirthdaysController < CakedayController
+    requires_plugin PLUGIN_NAME
+
     before_action :ensure_birthday_enabled
     before_action :exclude_hidden_birthdays
     before_action :restrict_to_celebrated_for_non_staff

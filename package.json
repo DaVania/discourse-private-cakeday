@@ -1,10 +1,6 @@
 {
-  "name": "discourse-cakeday",
-  "version": "0.2.0",
-  "repository": "https://github.com/discourse/discourse-cakeday",
-  "author": "Discourse",
-  "license": "MIT",
-  "devDependencies": {
-    "eslint-config-discourse": "^3.4.0"
+  "private": true,
+  "dependencies": {
+    "discourse": "npm:@discourse/types@*"
   }
 }
