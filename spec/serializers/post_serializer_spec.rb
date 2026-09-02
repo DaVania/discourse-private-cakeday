@@ -25,6 +25,52 @@ RSpec.describe PostSerializer do
     end
   end
 
+  context "when another member is logged in" do
+    fab!(:other, :user)
+
+    let(:serializer) { described_class.new(post, scope: Guardian.new(other), root: false) }
+
+    it "should mask the author's birthdate down to a day and month" do
+      user.custom_fields["show_birthday_to_be_celebrated"] = true
+      user.save_custom_fields
+
+      expect(serializer.as_json[:user_birthdate]).to eq(Date.new(1904, 4, 5))
+    end
+
+    it "should follow the site default when the author never chose" do
+      read = -> { described_class.new(post, scope: Guardian.new(other), root: false).as_json }
+
+      expect(read.call[:user_birthdate]).to eq(nil)
+      expect(read.call[:user_celebrate]).to eq(false)
+
+      SiteSetting.private_cakeday_birthday_celebrate = true
+
+      expect(read.call[:user_birthdate]).to eq(Date.new(1904, 4, 5))
+      expect(read.call[:user_celebrate]).to eq(true)
+    end
+
+    it "should hide it entirely when the author opted out of being celebrated" do
+      user.custom_fields["show_birthday_to_be_celebrated"] = false
+      user.save_custom_fields
+
+      expect(serializer.as_json[:user_birthdate]).to eq(nil)
+      expect(serializer.as_json[:user_celebrate]).to eq(false)
+    end
+  end
+
+  context "when the post has no author left" do
+    fab!(:admin)
+
+    let(:serializer) { described_class.new(post, scope: Guardian.new(admin), root: false) }
+
+    it "serializes without blowing up" do
+      post.update!(user_id: nil, deleted_at: Time.zone.now)
+
+      expect(serializer.as_json.key?(:user_birthdate)).to eq(false)
+      expect(serializer.as_json[:user_celebrate]).to eq(nil)
+    end
+  end
+
   context "when user is not logged in" do
     let(:serializer) { described_class.new(post, scope: Guardian.new, root: false) }
 

@@ -10,7 +10,10 @@ export function birthday(date) {
 }
 
 export function celebrate(u) {
-  return u.get('custom_fields.show_birthday_to_be_celebrated') === true;
+  // The server serializes the defaulted answer as a top-level attribute on the
+  // user and user-card payloads. The custom field is only present for
+  // self/staff and never on cards, so reading it made every card "secret".
+  return u.get("show_birthday_to_be_celebrated") === true;
 }
 
 export function userAge(dateOfBirth) {

@@ -90,24 +90,14 @@
       <label class="instructions">
         {{i18n "user.date_of_birth.always_visible_to_staff"}}
       </label>
-      {{#if this.model.custom_fields.show_birthday_to_be_celebrated}}
-        {{preference-checkbox labelKey="user.date_of_birth.limit_age_visibility_to_groups" checked=this.model.custom_fields.limit_age_visibility_to_groups}}
-        <label class="instructions">
-          {{i18n "user.date_of_birth.limit_age_visibility_to_groups2"}}
-        </label>
-        {{#if this.model.custom_fields.limit_age_visibility_to_groups}}
-        <div>
-          {{group-chooser
-            content=this.TLandCustomGroups
-            value=this.model.custom_fields.groups_fullbirthday_visible
-            labelProperty="name"
-            onChange=(action (mut this.model.custom_fields.groups_fullbirthday_visible))}}
-          <label class="instructions">
-            {{i18n "user.date_of_birth.show_age_to_theese_groups"}}
-          </label>
-        </div>
-        {{/if}}
-      {{/if}}
+      {{! The "limit age visibility to groups" checkbox and its group chooser
+          used to sit here. They never worked: the chooser writes
+          `groups_fullbirthday_visible`, which was never registered as an
+          editable user custom field, so the controller strips it from every
+          save and the column has no rows. Members who ticked it believed they
+          had restricted who could see their age, and had not. Removed rather
+          than left as a promise the code does not keep — see the commented-out
+          `shared_with_group?` in plugin.rb before reviving it. }}
       </div>
     {{/if}}
     </div>

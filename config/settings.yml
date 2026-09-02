@@ -6,7 +6,7 @@ plugins:
     default: 'cake'
     client: true
   private_cakeday_birthday_celebrate:
-    default: true
+    default: false
     client: true
   private_cakeday_birthday_enabled:
     default: true
