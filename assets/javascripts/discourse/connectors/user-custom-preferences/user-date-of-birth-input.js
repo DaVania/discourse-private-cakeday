@@ -114,7 +114,7 @@ export default {
     
     //needs an if siteSettings year required/available....
     //private_cakeday_birthday_show_year
-    if (showYear) component.addObserver("year", updateBirthdate);
+    if (showYear) {component.addObserver("year", updateBirthdate);}
     component.addObserver("month", updateBirthdate);
     component.addObserver("day", updateBirthdate);
     component.set("userBirthdateText", userBirthdateText(this.currentUser, showYear));

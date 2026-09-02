@@ -3,10 +3,10 @@ import {
   birthdayTitle,
   cakeday,
   cakedayTitle,
-  userAgeTitle,
-  userBirthdateTitle,
   celebrate,
   secretTitle,
+  userAgeTitle,
+  userBirthdateTitle,
 } from "discourse/plugins/discourse-private-cakeday/discourse/lib/cakeday";
 
 export default {

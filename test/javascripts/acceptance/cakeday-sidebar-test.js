@@ -1,14 +1,14 @@
-import { test } from "qunit";
-import I18n from "I18n";
 import { click, currentURL, visit } from "@ember/test-helpers";
+import { test } from "qunit";
+import { cloneJSON } from "discourse/lib/object";
 import {
   acceptance,
   exists,
   query,
 } from "discourse/tests/helpers/qunit-helpers";
+import { i18n } from "discourse-i18n";
 import anniversariesFixtures from "../fixtures/anniversaries";
 import birthdaysFixtures from "../fixtures/birthdays";
-import { cloneJSON } from "discourse-common/lib/object";
 
 acceptance("Cakeday - Sidebar with cakeday disabled", function (needs) {
   needs.user();
@@ -26,10 +26,7 @@ acceptance("Cakeday - Sidebar with cakeday disabled", function (needs) {
       ".sidebar-section[data-section-name='community'] .sidebar-more-section-links-details-summary"
     );
 
-    assert.ok(
-      !exists(".sidebar-section-link[data-link-name='anniversaries']"),
-      "it does not display the anniversaries link in sidebar"
-    );
+    assert.notOk(exists(".sidebar-section-link[data-link-name='anniversaries']"), "it does not display the anniversaries link in sidebar");
   });
 
   test("birthdays sidebar link is hidden", async function (assert) {
@@ -39,10 +36,7 @@ acceptance("Cakeday - Sidebar with cakeday disabled", function (needs) {
       ".sidebar-section[data-section-name='community'] .sidebar-more-section-links-details-summary"
     );
 
-    assert.ok(
-      !exists(".sidebar-section-link[data-link-name='birthdays']"),
-      "it does not display the birthdays link in sidebar"
-    );
+    assert.notOk(exists(".sidebar-section-link[data-link-name='birthdays']"), "it does not display the birthdays link in sidebar");
   });
 });
 
@@ -75,13 +69,13 @@ acceptance("Cakeday - Sidebar with cakeday enabled", function (needs) {
       query(
         ".sidebar-section-link[data-link-name='anniversaries']"
       ).textContent.trim(),
-      I18n.t("anniversaries.title"),
+      i18n("anniversaries.title"),
       "displays the right text for the link"
     );
 
     assert.strictEqual(
       query(".sidebar-section-link[data-link-name='anniversaries']").title,
-      I18n.t("anniversaries.title"),
+      i18n("anniversaries.title"),
       "displays the right title for the link"
     );
 
@@ -112,13 +106,13 @@ acceptance("Cakeday - Sidebar with cakeday enabled", function (needs) {
       query(
         ".sidebar-section-link[data-link-name='birthdays']"
       ).textContent.trim(),
-      I18n.t("birthdays.title"),
+      i18n("birthdays.title"),
       "displays the right text for the link"
     );
 
     assert.strictEqual(
       query(".sidebar-section-link[data-link-name='birthdays']").title,
-      I18n.t("birthdays.title"),
+      i18n("birthdays.title"),
       "displays the right title for the link"
     );
 

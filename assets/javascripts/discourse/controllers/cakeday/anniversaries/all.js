@@ -1,5 +1,5 @@
 import Controller from "@ember/controller";
-import computed from "discourse-common/utils/decorators";
+import computed from "discourse/lib/decorators";
 
 export default Controller.extend({
   queryParams: ["month"],

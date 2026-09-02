@@ -1,7 +1,7 @@
 import Component from "@ember/component";
-import computed from "discourse-common/utils/decorators";
+import computed from "discourse/lib/decorators";
 import { emojiUnescape } from "discourse/lib/text";
-import I18n from "I18n";
+import { i18n } from "discourse-i18n";
 
 export default Component.extend({
   classNames: ["emoji-images"],
@@ -15,6 +15,6 @@ export default Component.extend({
 
   @computed("title")
   titleText(title) {
-    return I18n.t(title);
+    return i18n(title);
   },
 });
