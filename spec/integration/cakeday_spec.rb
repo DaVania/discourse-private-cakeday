@@ -175,10 +175,7 @@ describe "Anniversaries and Birthdays" do
             Fabricate(:user, date_of_birth: "1904-9-30") # never chose
             celebrant(date_of_birth: "1904-9-30", celebrating: false) # opted out
 
-            expect(birthdays_today_ids).to contain_exactly(
-              current_spelling.id,
-              legacy_spelling.id,
-            )
+            expect(birthdays_today_ids).to contain_exactly(current_spelling.id, legacy_spelling.id)
           end
         end
 
@@ -237,7 +234,9 @@ describe "Anniversaries and Birthdays" do
 
         def listed_cakedate
           get "/cakeday/birthdays.json", params: { filter: "today" }
-          JSON.parse(response.body)["birthdays"].find { |u| u["id"] == listed_member.id }["cakedate"]
+          JSON.parse(response.body)["birthdays"].find { |u| u["id"] == listed_member.id }[
+            "cakedate"
+          ]
         end
 
         it "masks the birth year for other members" do
