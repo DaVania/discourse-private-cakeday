@@ -1,10 +1,11 @@
 import { getOwner } from "@ember/owner";
-import { click, visit } from "@ember/test-helpers";
+import { click, fillIn, visit } from "@ember/test-helpers";
 import { test } from "qunit";
 import { cloneJSON } from "discourse/lib/object";
 import User from "discourse/models/user";
 import userFixtures from "discourse/tests/fixtures/user-fixtures";
 import { acceptance } from "discourse/tests/helpers/qunit-helpers";
+import selectKit from "discourse/tests/helpers/select-kit-helper";
 import { i18n } from "discourse-i18n";
 
 const SETTINGS = {
@@ -182,5 +183,93 @@ acceptance("Cakeday - birthdate required, year selector off", function (needs) {
 
     assert.dom(".dialog-body").doesNotExist();
     assert.deepEqual(saves, ["1904-03-05"]);
+  });
+});
+
+// The profile page's `model` is `currentUser`, which chat and other features
+// save whole and unprompted, long after the member has left the page. What the
+// birthday input leaves on that object is what goes over the wire then.
+//
+// These modules do not demote the member: no Save button is clicked, so the
+// gate never runs and staff or not makes no difference. They run with the
+// requirement off, the configuration in which the server does not protect the
+// stored date either.
+const UNGUARDED = { ...SETTINGS, private_cakeday_birthday_required: false };
+
+async function saveFromAnotherPage(context) {
+  await visit("/");
+  await getOwner(context).lookup("service:current-user").save();
+}
+
+acceptance("Cakeday - half-edited birthday, one stored", function (needs) {
+  needs.user();
+  needs.settings(UNGUARDED);
+  const saves = trackSaves(needs, "1990-03-05");
+
+  test("clearing the year does not reach the server", async function (assert) {
+    await visit("/u/eviltrout/preferences/profile");
+    await fillIn("input.year", "");
+
+    await saveFromAnotherPage(this);
+
+    assert.deepEqual(
+      saves,
+      ["1990-03-05"],
+      "the stored date went, not a blank"
+    );
+  });
+
+  test("a half-typed year does not reach the server", async function (assert) {
+    await visit("/u/eviltrout/preferences/profile");
+    await fillIn("input.year", "19");
+
+    await saveFromAnotherPage(this);
+
+    assert.deepEqual(saves, ["1990-03-05"], "the stored date went, not 19-3-5");
+  });
+
+  test("emptying every field on purpose does reach the server", async function (assert) {
+    await visit("/u/eviltrout/preferences/profile");
+    await fillIn("input.year", "");
+    await click(selectKit(".birthday-month").clearButton());
+    await click(selectKit(".birthday-day").clearButton());
+
+    await saveFromAnotherPage(this);
+
+    assert.deepEqual(saves, [""], "a deliberate clear is still submitted");
+  });
+});
+
+acceptance("Cakeday - half-edited birthday, none stored", function (needs) {
+  needs.user();
+  needs.settings(UNGUARDED);
+  const saves = trackSaves(needs, null);
+
+  test("a year on its own does not reach the server", async function (assert) {
+    await visit("/u/eviltrout/preferences/profile");
+    await fillIn("input.year", "1990");
+
+    await saveFromAnotherPage(this);
+
+    assert.deepEqual(
+      saves,
+      [undefined],
+      "the key was absent from the payload; a blank would read as an empty string"
+    );
+  });
+
+  test("a completed form does reach the server", async function (assert) {
+    await visit("/u/eviltrout/preferences/profile");
+    const month = selectKit(".birthday-month");
+    await month.expand();
+    await month.selectRowByValue(3);
+    const day = selectKit(".birthday-day");
+    await day.expand();
+    await day.selectRowByValue("5");
+    await fillIn("input.year", "1990");
+
+    await saveFromAnotherPage(this);
+
+    assert.deepEqual(saves, ["1990-3-5"], "the new date went over the wire");
   });
 });
