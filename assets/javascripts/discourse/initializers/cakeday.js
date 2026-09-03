@@ -85,7 +85,11 @@ function initializeCakeday(api) {
     api.addTrackedPostProperties("user_celebrate");
 
     api.addPosterIcon((_, { user_birthdate, user_celebrate, user_id }) => {
-      if (birthday(user_birthdate) && user_celebrate !== true && (user_id === currentUser?.id || currentUser?.staff)) {
+      if (
+        birthday(user_birthdate) &&
+        user_celebrate !== true &&
+        (user_id === currentUser?.id || currentUser?.staff)
+      ) {
         let result = {};
 
         if (emojiEnabled) {
@@ -105,7 +109,12 @@ function initializeCakeday(api) {
     });
 
     api.addPosterIcon((_, { user_birthdate, user_celebrate, user_id }) => {
-      if (birthday(user_birthdate) && (user_celebrate === true || user_id === currentUser?.id || currentUser?.staff)) {
+      if (
+        birthday(user_birthdate) &&
+        (user_celebrate === true ||
+          user_id === currentUser?.id ||
+          currentUser?.staff)
+      ) {
         let result = {};
 
         if (emojiEnabled) {
