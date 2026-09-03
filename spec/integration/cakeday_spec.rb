@@ -65,7 +65,9 @@ describe "Anniversaries and Birthdays" do
       end
 
       it "should account for the current user's timezone" do
-        # Asia/Calcutta is +5.5 hours from UTC
+        # Asia/Calcutta is +5.5 hours from UTC. Deliberately the legacy alias: a
+        # Debian 13 database no longer knows it, so this also exercises the
+        # canonicalisation in CakedayController#cakedays_by.
         current_user.user_option.update!(timezone: "Asia/Calcutta")
 
         freeze_time(time) do
@@ -175,10 +177,7 @@ describe "Anniversaries and Birthdays" do
             Fabricate(:user, date_of_birth: "1904-9-30") # never chose
             celebrant(date_of_birth: "1904-9-30", celebrating: false) # opted out
 
-            expect(birthdays_today_ids).to contain_exactly(
-              current_spelling.id,
-              legacy_spelling.id,
-            )
+            expect(birthdays_today_ids).to contain_exactly(current_spelling.id, legacy_spelling.id)
           end
         end
 
@@ -237,7 +236,9 @@ describe "Anniversaries and Birthdays" do
 
         def listed_cakedate
           get "/cakeday/birthdays.json", params: { filter: "today" }
-          JSON.parse(response.body)["birthdays"].find { |u| u["id"] == listed_member.id }["cakedate"]
+          JSON.parse(response.body)["birthdays"].find { |u| u["id"] == listed_member.id }[
+            "cakedate"
+          ]
         end
 
         it "masks the birth year for other members" do

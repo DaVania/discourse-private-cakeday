@@ -18,7 +18,7 @@ module DiscoursePrivateCakeday
       @timezone = current_user&.user_option&.timezone
     end
 
-    def cakedays_by(column_sql, at_least_one_year_old: false)
+    def cakedays_by(column_sql, at_least_one_year_old: false, apply_timezone: false)
       more_params = { page: @page + 1, filter: params[:filter] }
 
       today =
@@ -27,6 +27,18 @@ module DiscoursePrivateCakeday
         rescue ArgumentError
           Time.zone.now
         end.to_date
+
+      # The stored name is whatever the browser reported, and PostgreSQL only
+      # knows it if the system tzdata does — Debian 13 ships legacy aliases such
+      # as Asia/Calcutta in a separate package the discourse_test image does not
+      # install. tzinfo-data knows them all, so resolve to the canonical
+      # identifier here and quote it, rather than pasting the raw name into SQL.
+      if apply_timezone && @timezone.present? && @timezone != "UTC"
+        if (iana_timezone = ActiveSupport::TimeZone[@timezone]&.tzinfo&.canonical_identifier)
+          quoted_timezone = ActiveRecord::Base.connection.quote(iana_timezone)
+          column_sql = "#{column_sql} AT TIME ZONE 'UTC' AT TIME ZONE #{quoted_timezone}"
+        end
+      end
 
       if at_least_one_year_old
         @users = @users.where("EXTRACT(YEAR FROM #{column_sql}) < ?", today.year)

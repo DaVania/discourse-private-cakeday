@@ -106,6 +106,14 @@ So while the requirement is on, the server-side check treats a blank
 The cost is that a member cannot clear a birthday they are required to have.
 Turn the requirement off and core's normal behaviour returns.
 
+The client keeps its side of the same bargain. The profile form's `model` is
+`currentUser`, so whatever the birthday input leaves in `date_of_birth` rides
+along on every later whole-user save. The input therefore writes the field only
+when the form is complete and valid, or when the member has emptied every part
+of it on purpose; a half-filled form leaves the stored date alone. The one thing
+that costs is that, with the requirement off, saving a half-filled form keeps
+the stored birthday instead of clearing it.
+
 Other exemptions: staff, bots, staged users, anonymous shadow accounts, and any
 update with no acting user.
 

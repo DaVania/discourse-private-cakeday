@@ -96,8 +96,9 @@ after_initialize do
     # set it. The user card and the post stream both ask through here; the
     # birthdays list is deliberately stricter and takes only an explicit yes.
     def self.custom_field_default(field)
-      return SiteSetting.private_cakeday_birthday_celebrate if
-        field.to_s == "show_birthday_to_be_celebrated"
+      if field.to_s == "show_birthday_to_be_celebrated"
+        return SiteSetting.private_cakeday_birthday_celebrate
+      end
 
       true
     end
@@ -105,9 +106,9 @@ after_initialize do
     # Callers pass either ActionController::Parameters or a plain Hash, and only
     # the former is indifferent about key types.
     def self.submitted_date_of_birth(attributes)
-      return [false, nil] unless attributes.respond_to?(:key?)
-      return [true, attributes[:date_of_birth]] if attributes.key?(:date_of_birth)
-      return [true, attributes["date_of_birth"]] if attributes.key?("date_of_birth")
+      return false, nil unless attributes.respond_to?(:key?)
+      return true, attributes[:date_of_birth] if attributes.key?(:date_of_birth)
+      return true, attributes["date_of_birth"] if attributes.key?("date_of_birth")
 
       [false, nil]
     end
@@ -163,10 +164,7 @@ after_initialize do
       def update(attributes = {})
         case ::DiscoursePrivateCakeday.birthdate_verdict(@actor, @user, attributes)
         when :reject
-          @user.errors.add(
-            :base,
-            I18n.t("private_cakeday.private_cakeday_birthday_required"),
-          )
+          @user.errors.add(:base, I18n.t("private_cakeday.private_cakeday_birthday_required"))
           return false
         when :keep
           attributes = ::DiscoursePrivateCakeday.without_date_of_birth(attributes)
@@ -189,18 +187,18 @@ after_initialize do
     get "anniversaries/:filter" => "anniversaries#index"
   end
 
-  Discourse::Application.routes.append { mount ::DiscoursePrivateCakeday::Engine, at: "/cakeday" }
+  # Core ships discourse-cakeday, which mounts its own engine at this very path
+  # and answers 404 from `requires_plugin` while `cakeday_enabled` is off — the
+  # default. Plugins load alphabetically, so an appended mount would sit behind
+  # it and never be reached; prepending puts ours first.
+  Discourse::Application.routes.prepend { mount ::DiscoursePrivateCakeday::Engine, at: "/cakeday" }
 
   # None of these are reachable by autoloading — `app/jobs/onceoff/` does not map
   # onto the `Jobs::` namespace, and the engine's own controllers and serializers
   # are not on the autoload path either — so they have to be pulled in by hand.
   #
-  # `require_relative`, not `load`: `load` re-executes the file on every call and
-  # defines the constants outside Zeitwerk's bookkeeping, which under eager
-  # loading leaves Rails unable to resolve the engine's controllers. That surfaces
-  # as a routing failure — 404 on every /cakeday/* endpoint, with nothing naming
-  # the real cause — which is exactly how it presented in CI while passing
-  # locally. `require_relative` defines each constant once, deterministically.
+  # `require_relative`, not `load`: `load` re-executes the file and redefines
+  # every constant on each call; `require_relative` defines each of them once.
   %w[
     app/jobs/onceoff/fix_invalid_date_of_birth
     app/jobs/onceoff/migrate_date_of_birth_to_users_table
@@ -263,10 +261,7 @@ after_initialize do
     include_condition: -> { SiteSetting.private_cakeday_birthday_enabled && scope.user.present? },
   ) { object.user&.show_birthday_to_be_celebrated }
 
-  %w[
-    show_birthday_to_be_celebrated
-    limit_age_visibility_to_groups
-  ].each do |field|
+  %w[show_birthday_to_be_celebrated limit_age_visibility_to_groups].each do |field|
     User.register_custom_field_type(field, :boolean)
     DiscoursePluginRegistry.serialized_current_user_fields << field
     register_editable_user_custom_field field.to_sym
@@ -283,8 +278,5 @@ after_initialize do
     end
   end
 
-  add_to_serializer(:admin_user, :birthdate?) do
-    object&.date_of_birth
-  end
-
+  add_to_serializer(:admin_user, :birthdate?) { object&.date_of_birth }
 end

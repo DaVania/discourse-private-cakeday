@@ -161,9 +161,17 @@ export default class UserDateOfBirthInput extends Component {
       hasBirthdate = false;
     }
 
-    // The property that is being serialized when sending the update
-    // request to the server is called `date_of_birth`
-    this.model.set("date_of_birth", date);
+    // `model` is `currentUser` on the member's own profile, so whatever sits
+    // in `date_of_birth` rides along on every whole-user save -- chat's
+    // `currentUser.save()` included -- and the server reads a blank as
+    // "clear it". A half-filled form is not a value, and neither is a
+    // half-typed year: leave the stored date alone until the form is complete
+    // and valid, or emptied on purpose.
+    const emptied = !this.day && !this.month && !(this.showYear && this.year);
+
+    if (hasBirthdate || emptied) {
+      this.model.set("date_of_birth", date);
+    }
     this.hasAge = this.year !== null && this.year > YEARLESS;
     this.hasBirthdate = hasBirthdate;
     this.model.set("hasBirthdate", hasBirthdate);
@@ -190,13 +198,14 @@ export default class UserDateOfBirthInput extends Component {
 
   <template>
     {{#if this.siteSettings.private_cakeday_birthday_enabled}}
-      <a name="cakeday"></a>
+      <a name="cakeday" aria-hidden="true"></a>
       <div class="control-group">
         <label class="control-label">{{i18n "user.date_of_birth.label"}}</label>
         <div class="controls">
           {{#if this.canChangeBirthdate}}
             {{#if this.siteSettings.private_cakeday_birthday_formatdmy}}
               <ComboBox
+                class="birthday-day"
                 @content={{this.days}}
                 @value={{this.day}}
                 @valueProperty={{null}}
@@ -213,6 +222,7 @@ export default class UserDateOfBirthInput extends Component {
                 -
               {{/if}}
               <ComboBox
+                class="birthday-month"
                 @content={{this.months}}
                 @value={{this.month}}
                 @valueAttribute="value"
@@ -227,6 +237,7 @@ export default class UserDateOfBirthInput extends Component {
               />
             {{else}}
               <ComboBox
+                class="birthday-month"
                 @content={{this.months}}
                 @value={{this.month}}
                 @valueAttribute="value"
@@ -243,6 +254,7 @@ export default class UserDateOfBirthInput extends Component {
                 -
               {{/if}}
               <ComboBox
+                class="birthday-day"
                 @content={{this.days}}
                 @value={{this.day}}
                 @valueProperty={{null}}
@@ -305,6 +317,7 @@ export default class UserDateOfBirthInput extends Component {
           {{#if this.showCelebrateCheckbox}}
             <div style="margin-top: 10px;"><a
                 name="show_birthday_to_be_celebrated"
+                aria-hidden="true"
               ></a>
               <PreferenceCheckbox
                 @labelKey="user.date_of_birth.show_birthday_to_be_celebrated"
