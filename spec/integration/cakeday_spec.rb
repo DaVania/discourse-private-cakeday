@@ -65,7 +65,9 @@ describe "Anniversaries and Birthdays" do
       end
 
       it "should account for the current user's timezone" do
-        # Asia/Calcutta is +5.5 hours from UTC
+        # Asia/Calcutta is +5.5 hours from UTC. Deliberately the legacy alias: a
+        # Debian 13 database no longer knows it, so this also exercises the
+        # canonicalisation in CakedayController#cakedays_by.
         current_user.user_option.update!(timezone: "Asia/Calcutta")
 
         freeze_time(time) do
