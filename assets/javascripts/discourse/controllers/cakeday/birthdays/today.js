@@ -1,12 +1,12 @@
 import Controller from "@ember/controller";
-import I18n from "I18n";
-import computed from "discourse-common/utils/decorators";
+import computed from "discourse/lib/decorators";
+import { i18n } from "discourse-i18n";
 
 export default Controller.extend({
   @computed
   title() {
-    return I18n.t("birthdays.today.title", {
-      date: moment().format(I18n.t("dates.full_no_year_no_time")),
+    return i18n("birthdays.today.title", {
+      date: moment().format(i18n("dates.full_no_year_no_time")),
     });
   },
 

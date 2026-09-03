@@ -1,6 +1,6 @@
-import I18n from "I18n";
 import { action } from "@ember/object";
 import { withPluginApi } from "discourse/lib/plugin-api";
+import { i18n } from "discourse-i18n";
 import {
   birthday,
   cakeday,
@@ -42,7 +42,7 @@ function initializeCakeday(api) {
           ) {
             this.set("saved", false);
             this.dialog.alert({
-              message: I18n.t("user.date_of_birth.is_required_error"),
+              message: i18n("user.date_of_birth.is_required_error"),
             });
             return;
           }
@@ -70,9 +70,9 @@ function initializeCakeday(api) {
         }
 
         if (user_id === currentUser?.id) {
-          result.title = I18n.t("user.anniversary.user_title");
+          result.title = i18n("user.anniversary.user_title");
         } else {
-          result.title = I18n.t("user.anniversary.title");
+          result.title = i18n("user.anniversary.title");
         }
 
         return result;
@@ -95,9 +95,9 @@ function initializeCakeday(api) {
         }
 
         if (user_id === currentUser?.id) {
-          result.title = I18n.t("user.date_of_birth.user_secret_title");
+          result.title = i18n("user.date_of_birth.user_secret_title");
         } else {
-          result.title = I18n.t("user.date_of_birth.secret_title");
+          result.title = i18n("user.date_of_birth.secret_title");
         }
 
         return result;
@@ -115,9 +115,9 @@ function initializeCakeday(api) {
         }
 
         if (user_id === currentUser?.id) {
-          result.title = I18n.t("user.date_of_birth.user_title");
+          result.title = i18n("user.date_of_birth.user_title");
         } else {
-          result.title = I18n.t("user.date_of_birth.title");
+          result.title = i18n("user.date_of_birth.title");
         }
 
         return result;
@@ -134,8 +134,8 @@ function initializeCakeday(api) {
         api.addCommunitySectionLink({
           name: "anniversaries",
           route: "cakeday.anniversaries.today",
-          title: I18n.t("anniversaries.title"),
-          text: I18n.t("anniversaries.title"),
+          title: i18n("anniversaries.title"),
+          text: i18n("anniversaries.title"),
           icon: "birthday-cake",
         });
       }
@@ -144,8 +144,8 @@ function initializeCakeday(api) {
         api.addCommunitySectionLink({
           name: "birthdays",
           route: "cakeday.birthdays.today",
-          title: I18n.t("birthdays.title"),
-          text: I18n.t("birthdays.title"),
+          title: i18n("birthdays.title"),
+          text: i18n("birthdays.title"),
           icon: "birthday-cake",
         });
       }
@@ -173,6 +173,6 @@ export default {
   name: "cakeday",
 
   initialize() {
-    withPluginApi("0.1", (api) => initializeCakeday(api));
+    withPluginApi((api) => initializeCakeday(api));
   },
 };

@@ -191,15 +191,25 @@ after_initialize do
 
   Discourse::Application.routes.append { mount ::DiscoursePrivateCakeday::Engine, at: "/cakeday" }
 
+  # None of these are reachable by autoloading — `app/jobs/onceoff/` does not map
+  # onto the `Jobs::` namespace, and the engine's own controllers and serializers
+  # are not on the autoload path either — so they have to be pulled in by hand.
+  #
+  # `require_relative`, not `load`: `load` re-executes the file on every call and
+  # defines the constants outside Zeitwerk's bookkeeping, which under eager
+  # loading leaves Rails unable to resolve the engine's controllers. That surfaces
+  # as a routing failure — 404 on every /cakeday/* endpoint, with nothing naming
+  # the real cause — which is exactly how it presented in CI while passing
+  # locally. `require_relative` defines each constant once, deterministically.
   %w[
-    ../app/jobs/onceoff/fix_invalid_date_of_birth.rb
-    ../app/jobs/onceoff/migrate_date_of_birth_to_users_table.rb
-    ../app/serializers/discourse_private_cakeday/cakeday_user_serializer.rb
-    ../app/serializers/discourse_private_cakeday/birthday_user_serializer.rb
-    ../app/controllers/discourse_private_cakeday/cakeday_controller.rb
-    ../app/controllers/discourse_private_cakeday/anniversaries_controller.rb
-    ../app/controllers/discourse_private_cakeday/birthdays_controller.rb
-  ].each { |path| load File.expand_path(path, __FILE__) }
+    app/jobs/onceoff/fix_invalid_date_of_birth
+    app/jobs/onceoff/migrate_date_of_birth_to_users_table
+    app/serializers/discourse_private_cakeday/cakeday_user_serializer
+    app/serializers/discourse_private_cakeday/birthday_user_serializer
+    app/controllers/discourse_private_cakeday/cakeday_controller
+    app/controllers/discourse_private_cakeday/anniversaries_controller
+    app/controllers/discourse_private_cakeday/birthdays_controller
+  ].each { |path| require_relative path }
 
   # overwrite the user and user_card serializers to show
   # the cakes on the user card and on the user profile pages

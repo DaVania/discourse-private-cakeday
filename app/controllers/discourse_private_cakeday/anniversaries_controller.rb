@@ -2,6 +2,8 @@
 
 module DiscoursePrivateCakeday
   class AnniversariesController < CakedayController
+    requires_plugin PLUGIN_NAME
+
     before_action :ensure_private_cakeday_enabled
 
     def index
