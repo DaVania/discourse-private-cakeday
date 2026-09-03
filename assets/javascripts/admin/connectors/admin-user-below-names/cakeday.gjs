@@ -104,7 +104,11 @@ export default class AdminUserCakeday extends Component {
               @autocomplete="off"
             />
           {{else}}
-            <a href {{on "click" this.toggleEditing}} class="inline-editable-field">
+            <a
+              href
+              {{on "click" this.toggleEditing}}
+              class="inline-editable-field"
+            >
               <span>{{this.user.birthdate}}</span>
             </a>
           {{/if}}

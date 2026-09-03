@@ -169,21 +169,18 @@ acceptance(
   }
 );
 
-acceptance(
-  "Cakeday - birthdate required, year selector off",
-  function (needs) {
-    needs.user();
-    needs.settings({ ...SETTINGS, private_cakeday_birthday_show_year: false });
-    const saves = trackSaves(needs, "1904-03-05");
+acceptance("Cakeday - birthdate required, year selector off", function (needs) {
+  needs.user();
+  needs.settings({ ...SETTINGS, private_cakeday_birthday_show_year: false });
+  const saves = trackSaves(needs, "1904-03-05");
 
-    test("a year-less birthday is enough", async function (assert) {
-      await visit("/u/eviltrout/preferences/profile");
-      demoteToMember(this);
+  test("a year-less birthday is enough", async function (assert) {
+    await visit("/u/eviltrout/preferences/profile");
+    demoteToMember(this);
 
-      await click(".save-changes");
+    await click(".save-changes");
 
-      assert.dom(".dialog-body").doesNotExist();
-      assert.deepEqual(saves, ["1904-03-05"]);
-    });
-  }
-);
+    assert.dom(".dialog-body").doesNotExist();
+    assert.deepEqual(saves, ["1904-03-05"]);
+  });
+});

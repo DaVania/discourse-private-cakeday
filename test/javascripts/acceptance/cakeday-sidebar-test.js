@@ -26,7 +26,10 @@ acceptance("Cakeday - Sidebar with cakeday disabled", function (needs) {
       ".sidebar-section[data-section-name='community'] .sidebar-more-section-links-details-summary"
     );
 
-    assert.notOk(exists(".sidebar-section-link[data-link-name='anniversaries']"), "it does not display the anniversaries link in sidebar");
+    assert.false(
+      exists(".sidebar-section-link[data-link-name='anniversaries']"),
+      "it does not display the anniversaries link in sidebar"
+    );
   });
 
   test("birthdays sidebar link is hidden", async function (assert) {
@@ -36,7 +39,10 @@ acceptance("Cakeday - Sidebar with cakeday disabled", function (needs) {
       ".sidebar-section[data-section-name='community'] .sidebar-more-section-links-details-summary"
     );
 
-    assert.notOk(exists(".sidebar-section-link[data-link-name='birthdays']"), "it does not display the birthdays link in sidebar");
+    assert.false(
+      exists(".sidebar-section-link[data-link-name='birthdays']"),
+      "it does not display the birthdays link in sidebar"
+    );
   });
 });
 
@@ -79,7 +85,7 @@ acceptance("Cakeday - Sidebar with cakeday enabled", function (needs) {
       "displays the right title for the link"
     );
 
-    assert.ok(
+    assert.true(
       exists(
         ".sidebar-section-link[data-link-name='anniversaries'] .sidebar-section-link-prefix.icon .d-icon-birthday-cake"
       ),
@@ -116,7 +122,7 @@ acceptance("Cakeday - Sidebar with cakeday enabled", function (needs) {
       "displays the right title for the link"
     );
 
-    assert.ok(
+    assert.true(
       exists(
         ".sidebar-section-link[data-link-name='birthdays'] .sidebar-section-link-prefix.icon .d-icon-birthday-cake"
       ),

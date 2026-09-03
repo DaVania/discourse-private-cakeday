@@ -190,7 +190,7 @@ export default class UserDateOfBirthInput extends Component {
 
   <template>
     {{#if this.siteSettings.private_cakeday_birthday_enabled}}
-      <a name="cakeday"></a>
+      <a name="cakeday" aria-hidden="true"></a>
       <div class="control-group">
         <label class="control-label">{{i18n "user.date_of_birth.label"}}</label>
         <div class="controls">
@@ -305,6 +305,7 @@ export default class UserDateOfBirthInput extends Component {
           {{#if this.showCelebrateCheckbox}}
             <div style="margin-top: 10px;"><a
                 name="show_birthday_to_be_celebrated"
+                aria-hidden="true"
               ></a>
               <PreferenceCheckbox
                 @labelKey="user.date_of_birth.show_birthday_to_be_celebrated"
