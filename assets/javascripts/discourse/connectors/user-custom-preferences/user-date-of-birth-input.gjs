@@ -3,6 +3,7 @@ import { tracked } from "@glimmer/tracking";
 import { hash } from "@ember/helper";
 import { on } from "@ember/modifier";
 import { action } from "@ember/object";
+import { schedule } from "@ember/runloop";
 import { service } from "@ember/service";
 import PreferenceCheckbox from "discourse/components/preference-checkbox";
 import ComboBox from "discourse/select-kit/components/combo-box";
@@ -39,13 +40,7 @@ export default class UserDateOfBirthInput extends Component {
     const { model } = this.args;
     const { birthdate } = model;
 
-    // Nothing serializes `date_of_birth`, only `birthdate`, so the model would
-    // otherwise submit an empty `date_of_birth` on every save and silently wipe
-    // the stored date. Seed it so an untouched form saves back what it shows,
-    // and an empty submission really does mean "the user cleared the field".
     if (birthdate) {
-      model.set("date_of_birth", birthdate);
-
       const parsed = moment(birthdate, "YYYY-MM-DD");
       this.year = parsed.year() === YEARLESS ? null : parsed.year();
       this.month = parsed.month() + 1;
@@ -56,25 +51,44 @@ export default class UserDateOfBirthInput extends Component {
     // plugin.rb: with the year selector on, a birthday carrying the year-less
     // sentinel does not count. `year` is already null in that case.
     this.hasBirthdate = this.showYear ? this.year !== null : Boolean(birthdate);
-    model.set("hasBirthdate", this.hasBirthdate);
 
     this.hasAge = this.year !== null;
     this.canControlVisibility = this.visibilityControllableFor(birthdate);
 
-    // Seed the celebrate checkbox from the site default -- but only when the
-    // checkbox is actually on screen. `custom_fields` rides along on every
-    // profile save, so seeding it for a member who cannot see the control
-    // writes their "choice" to the database without them ever making one.
-    if (
-      model.custom_fields.show_birthday_to_be_celebrated === undefined &&
-      this.canControlVisibility &&
-      this.hasAge
-    ) {
-      model.set(
-        "custom_fields.show_birthday_to_be_celebrated",
-        this.siteSettings.private_cakeday_birthday_celebrate
-      );
-    }
+    // The model is seeded only once this render has finished: another
+    // connector on this outlet (custom-ap-profile) has already read
+    // `hasBirthdate` and `custom_fields` off the same model during this
+    // render, and writing a value that was read in the same render trips
+    // Ember's backtracking assertion, which aborts the rest of the page --
+    // the Save button included. afterRender still runs before the next paint.
+    schedule("afterRender", () => {
+      // Nothing serializes `date_of_birth`, only `birthdate`, so the model
+      // would otherwise submit an empty `date_of_birth` on every save and
+      // silently wipe the stored date. Seed it so an untouched form saves
+      // back what it shows, and an empty submission really does mean "the
+      // user cleared the field".
+      if (birthdate) {
+        model.set("date_of_birth", birthdate);
+      }
+
+      model.set("hasBirthdate", this.hasBirthdate);
+
+      // Seed the celebrate checkbox from the site default -- but only when
+      // the checkbox is actually on screen. `custom_fields` rides along on
+      // every profile save, so seeding it for a member who cannot see the
+      // control writes their "choice" to the database without them ever
+      // making one.
+      if (
+        model.custom_fields.show_birthday_to_be_celebrated === undefined &&
+        this.canControlVisibility &&
+        this.hasAge
+      ) {
+        model.set(
+          "custom_fields.show_birthday_to_be_celebrated",
+          this.siteSettings.private_cakeday_birthday_celebrate
+        );
+      }
+    });
 
     // Whether the form is editable is decided once, from the saved birthday.
     // It must not follow the selectors, or the form would collapse under a
